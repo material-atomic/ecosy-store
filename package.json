@@ -1,6 +1,6 @@
 {
   "name": "@ecosy/store",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Lightweight state management with slices, reducers, and event-driven architecture",
   "license": "MIT",
   "publishConfig": {
@@ -43,7 +43,7 @@
   ],
   "author": "material-atomic",
   "dependencies": {
-    "@ecosy/core": "^0.1.0"
+    "@ecosy/core": "*"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

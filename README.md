@@ -100,6 +100,47 @@ actions.signals.sync();
 
 ---
 
+### `combineSlices(slices)`
+
+Merges multiple slices into a single initial state, a root reducer, and an event map.
+
+```ts
+import { combineSlices, createSlice } from "@ecosy/store";
+
+const counterSlice = createSlice({ /* ... */ });
+const userSlice = createSlice({ /* ... */ });
+
+const combined = combineSlices({
+  counter: counterSlice,
+  user: userSlice,
+});
+
+combined.initialState; // { counter: { ... }, user: { ... } }
+combined.reducer;      // root reducer delegating per-slice
+combined.events;       // merged event channel map
+```
+
+### `configureStore(options)`
+
+Framework-agnostic store factory for combined slices. Safe to use in Workers, Server, or any non-React runtime.
+
+```ts
+import { configureStore } from "@ecosy/store";
+
+const { store, dispatch, getState, hydrate } = configureStore({
+  slices: combined,
+  signals: ["reset", "sync"],
+});
+
+dispatch(counterSlice.actions.increment());
+getState();
+hydrate({ counter: { count: 42 } });
+```
+
+For React bindings (`useSelector`, `useDispatch`, `createSelector`), use [`@ecosy/react`](https://github.com/material-atomic/ecosy-react)'s `connectStore`, which is built on top of `configureStore`.
+
+---
+
 ### Types
 
 | Type | Description |
@@ -108,8 +149,9 @@ actions.signals.sync();
 | `AnyAction` | `PayloadAction<any, any, any, any>` |
 | `Reducers<State, Action>` | Map of reducer handlers |
 | `Slice<State, R, N>` | Return type of `createSlice` |
-| `CreateStoreOptions` | Options for `createStore` |
-| `CreateStoreReturn` | Return type of `createStore` |
+| `CreateStoreOptions` / `CreateStoreReturn` | Options and return type of `createStore` |
+| `SliceMap`, `CombinedState`, `CombinedEvents`, `CombinedActions`, `CombineSlicesResult` | Helpers for `combineSlices` |
+| `ConfigureStoreOptions`, `ConfigureStoreResult` | Options and return type of `configureStore` |
 
 ### `getType(prefix, key)`
 
