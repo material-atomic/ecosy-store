@@ -1,40 +1,49 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type ExtendedEventExpect, Subscriber } from "@ecosy/core/subscriber";
-import { type AnyAction, getType, type PayloadAction, type Reducers, type StateResult } from "./utils";
+import {
+  type AnyAction,
+  getType,
+  type PayloadAction,
+  type Reducers,
+  type StateResult,
+} from "./utils";
 import type { LiteralObject, PartialLiteral, ToString } from "@ecosy/core/types";
 
 type EventTemplate<Name extends string, Key extends PropertyKey> = `$${Name}:${ToString<Key>}`;
 
-type ExtractEvents<
-  R extends Reducers<any, any>,
-  N = never,
-  Signals extends string[] = [],
-> = [N] extends [string] ? {
-  [Name in N]: {
-    [Key in keyof R]: EventTemplate<Name, Key>;
-  };
-} : {
-  signals: {
-    [S in Signals[number]]: EventTemplate<"signals", S>;
-  }
-};
+type ExtractEvents<R extends Reducers<any, any>, N = never, Signals extends string[] = []> = [
+  N,
+] extends [string]
+  ? {
+      [Name in N]: {
+        [Key in keyof R]: EventTemplate<Name, Key>;
+      };
+    }
+  : {
+      signals: {
+        [S in Signals[number]]: EventTemplate<"signals", S>;
+      };
+    };
 
 type Actions<
   R extends Reducers<any, any>,
   N extends string | never = never,
-  Signals extends string[] = string[]
+  Signals extends string[] = string[],
 > = {
   signals: {
-    [S in (Signals[number] & ([N] extends [never] ? keyof R : never))]: () => void;
+    [S in Signals[number] & ([N] extends [never] ? keyof R : never)]: () => void;
   };
 } & {
   [K in keyof R]: R[K] extends (state: any) => any
     ? () => void
     : R[K] extends (state: any, action: PayloadAction<infer P, string, infer M, infer D>) => any
-      ? [P] extends [never] ? () => void
-        : [M] extends [never] ? (payload: P) => void
-        : [D] extends [never] ? (payload: P, meta: M) => void
-        : (payload: P, meta: M, delta: D) => void
+      ? [P] extends [never]
+        ? () => void
+        : [M] extends [never]
+          ? (payload: P) => void
+          : [D] extends [never]
+            ? (payload: P, meta: M) => void
+            : (payload: P, meta: M, delta: D) => void
       : () => void;
 };
 
@@ -58,7 +67,7 @@ export interface CreateStoreReturn<
   Store,
   R extends Reducers<any, any>,
   N extends string | never,
-  Signals extends string[] = []
+  Signals extends string[] = [],
 > {
   store: Store;
   actions: Actions<R, N, Signals>;
@@ -123,9 +132,7 @@ export function createStore<
 
   // 3. Merge extraEvents
 
-  const combinedEvents = Object.assign(
-    {} as AllEvents, finalEvents, extraEvents,
-  );
+  const combinedEvents = Object.assign({} as AllEvents, finalEvents, extraEvents);
 
   // 4. Create store instance + wire
 
@@ -149,7 +156,8 @@ export function createStore<
           delta: args[2],
         };
         const state = store.shallow.clone(store.getState()) as S;
-        const nextState = (reducer as (state: S, action: unknown) => StateResult<S>)(state, action) ?? state;
+        const nextState =
+          (reducer as (state: S, action: unknown) => StateResult<S>)(state, action) ?? state;
         store.setState(nextState);
         store.dispatch(channel, action);
       };

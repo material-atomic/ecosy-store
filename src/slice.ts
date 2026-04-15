@@ -22,10 +22,7 @@ const INITIALIZE = "$$initialize";
 
 type EventTemplate<Name extends string, Key extends PropertyKey> = `$${Name}:${ToString<Key>}`;
 
-type SliceEvents<
-  R extends Reducers<any, any>,
-  N extends string,
-> = {
+type SliceEvents<R extends Reducers<any, any>, N extends string> = {
   [N_ in N]: {
     [K in keyof R]: EventTemplate<N_, K>;
   };
@@ -47,8 +44,15 @@ type SliceActions<R extends Record<string, any>, N extends string> = {
         : [M] extends [never]
           ? (payload: P) => PayloadAction<P, EventTemplate<N, Extract<K, string>>, never, never>
           : [D] extends [never]
-            ? (payload: P, meta: M) => PayloadAction<P, EventTemplate<N, Extract<K, string>>, M, never>
-            : (payload: P, meta: M, delta: D) => PayloadAction<P, EventTemplate<N, Extract<K, string>>, M, D>
+            ? (
+                payload: P,
+                meta: M,
+              ) => PayloadAction<P, EventTemplate<N, Extract<K, string>>, M, never>
+            : (
+                payload: P,
+                meta: M,
+                delta: D,
+              ) => PayloadAction<P, EventTemplate<N, Extract<K, string>>, M, D>
       : never
     : () => PayloadAction<never, EventTemplate<N, Extract<K, string>>>;
 };

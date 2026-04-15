@@ -33,10 +33,7 @@ export type ReducerHandler<
   Action extends PayloadAction<any, any, any, any>,
 > = [Action] extends [never] ? ReducerEmpty<State> : ReducerPayload<State, Action>;
 
-export type Reducers<
-  State extends LiteralObject,
-  Action extends AnyAction,
-> = {
+export type Reducers<State extends LiteralObject, Action extends AnyAction> = {
   [key: string]: ReducerHandler<State, Action>;
 };
 
