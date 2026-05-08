@@ -14,10 +14,18 @@ export type CombinedState<Slices extends SliceMap<any>> = [Slices] extends [Slic
   ? State
   : never;
 
+/**
+ * Per-slice event channel map. Each slice stores its events as
+ * `{ [name]: { ...keys } }`, which `combineSlices` flattens at runtime to
+ * `{ [sliceKey]: { ...keys } }`. The type below mirrors that flattening so
+ * the wired store exposes `store.<sliceKey>.<eventKey>` correctly.
+ */
 export type CombinedEvents<Slices extends SliceMap<any>> = {
-  [K in keyof Slices]: [Slices[K]] extends [{ events: infer Events }]
-    ? [Events] extends [{}]
-      ? { [E in keyof Events]: Events[E] }
+  [K in keyof Slices]: Slices[K] extends { events: infer Events; name: infer Name }
+    ? Name extends string
+      ? Name extends keyof Events
+        ? Events[Name]
+        : never
       : never
     : never;
 };
